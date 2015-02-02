@@ -30,7 +30,7 @@ int elev_init(void);
   Sets the motor direction of the elevator.
   @param dirn New direction of the elevator.
 */
-void elev_set_motor_direction(elev_motor_direction_t dirn);
+void elev_set_motor_direction(motorDirectionT dirn);
 
 
 
