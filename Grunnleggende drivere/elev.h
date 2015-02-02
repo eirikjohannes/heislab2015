@@ -22,6 +22,11 @@ int elev_init(void);
 /**
   Motor direction for function elev_set_motor_direction().
 */
+typedef enum elevMotorDirection { 
+    DOWN = -1,
+    STOP = 0,
+    UP = 1
+} motorDirectionT;
 
 
 

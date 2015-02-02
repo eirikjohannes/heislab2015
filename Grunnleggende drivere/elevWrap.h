@@ -5,11 +5,6 @@
 
 int elevInit(void);
 
-typedef enum elevMotorDirection { 
-    DOWN = -1,
-    STOP = 0,
-    UP = 1
-} motorDirectionT;
 
 void setMotorDirection(motorDirectionT dir);
 
