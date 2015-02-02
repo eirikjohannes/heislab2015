@@ -5,6 +5,17 @@
 
 int elevInit(void);
 
+typedef enum tag_elev_lamp_type { 
+    BUTTON_CALL_UP = 0,
+    BUTTON_CALL_DOWN = 1,
+    BUTTON_COMMAND = 2
+} elev_button_type_t;
+
+typedef enum elevMotorDirection { 
+    DOWN = -1,
+    STOP = 0,
+    UP = 1
+} motorDirectionT;
 
 void setMotorDirection(motorDirectionT dir);
 
