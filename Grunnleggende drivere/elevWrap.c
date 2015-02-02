@@ -19,7 +19,7 @@ void setDoorOpenLamp(int value){
 
 int checkStopButton(void)
 {
-	return elev_get_stop_signal(void);
+	return elev_get_stop_signal();
 }
 
 void setStopLamp(int value){
@@ -27,7 +27,7 @@ void setStopLamp(int value){
 }
 
 int getFloor(void){
-	int i = elev_get_floor_sensor_signal(void);
+	int i = elev_get_floor_sensor_signal();
 	switch (i){
 	case -1: return -1;
 	break;

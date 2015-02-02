@@ -22,7 +22,17 @@ int elev_init(void);
 /**
   Motor direction for function elev_set_motor_direction().
 */
+typedef enum tag_elev_lamp_type { 
+    BUTTON_CALL_UP = 0,
+    BUTTON_CALL_DOWN = 1,
+    BUTTON_COMMAND = 2
+} elev_button_type_t;
 
+typedef enum elevMotorDirection { 
+    DOWN = -1,
+    STOP = 0,
+    UP = 1
+} motorDirectionT;
 
 
 
@@ -115,6 +125,6 @@ int elev_get_button_signal(elev_button_type_t button, int floor);
 */
 void elev_set_button_lamp(elev_button_type_t button, int floor, int value);
 
-
+1
 
 #endif // #ifndef __INCLUDE_DRIVER_H__
