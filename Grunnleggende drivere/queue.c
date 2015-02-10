@@ -20,22 +20,20 @@ void checkForDirectionAndFloorMatch(struct queueNode *order) //Checks if the ord
 		if(order->floor==tempNode->floor)
 		{
 			floorMatch = true;
-			printf("\nOder->floor==tempnode->floor\n");
 		}	
 		if(order->relativeDir == tempNode->relativeDir)
 		{
 			directionMatch = true;
-			printf("\nOder->relativeDir==tempnode->relativeDir\n");
 		}
 	}
 	if(floorMatch && directionMatch)
 	{			
 		free(order); //deletes the order trying to be placed	
-		printf("\nfrees order\n");
+		
 	}
 	else
 	{
-		
+		pushQueue();
 	}
 	
 
@@ -50,10 +48,13 @@ void popQueue(){
 }
 
 
-void deleteOrder(void)
+void deleteOrder(struct queueNode * order)
 {
-	
-	
+	struct queueNode * tempOrder = order->next;
+	tempOrder->previous = order->previous;
+	//Erstattet order sin posisjon med temporder
+	free(order);
+	printf("\nOrder deleted\n");
 }
 
 void initializeQueue(void)

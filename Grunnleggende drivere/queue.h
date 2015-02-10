@@ -20,7 +20,7 @@ void orderIn(int floor, int currentFloor, int currentDir);
 
 void orderOut(int floor, elev_motor_direction_t dir, int currentFloor, elev_motor_direction_t currentDir);
 
-void deleteOrder(void);
+void deleteOrder(struct queueNode * order);
 
 /*
 Deletes all orders in case of stopBtn pushed
@@ -30,7 +30,7 @@ void deleteAllOrders(void);
 /*
 Returns the order on top of queue
 */
-int getCurrentOrder(int floor, elev_motor_direction_t dir);
+struct queueNode* getCurrentOrder(int floor, elev_motor_direction_t dir);
 
 
 
