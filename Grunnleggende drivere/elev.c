@@ -56,7 +56,7 @@ int elev_init(void) {
     return 1;
 }
 
-void elev_set_motor_direction(motorDirectionT dirn) {
+void elev_set_motor_direction(elev_motor_direction_t dirn) {
     if (dirn == 0){
         io_write_analog(MOTOR, 0);
     } else if (dirn > 0) {
