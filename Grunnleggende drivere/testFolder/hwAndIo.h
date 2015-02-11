@@ -4,14 +4,17 @@
 
 #include "testelev.h"
 #include "queue.h"
+#include <stdbool.h>
 
 void setMotorDirection(elev_motor_direction_t dir);
 
 void checkButtons(void);
 
-void checkStopButton(void);
+bool checkStopButton(void);
 
 void arriveAtFloor(void);
+
+int getFloor(void);
 
 
 #endif //__HW_IO_H__

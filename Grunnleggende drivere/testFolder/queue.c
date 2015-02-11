@@ -7,7 +7,13 @@
 #include <math.h>
 
 static struct orderL orderList;
-void printOrders();
+
+void printOrders(){
+	printf("Up, down, command\n");
+	for (int i=0; i<4;i++){
+		printf(" %d, %d, %d \n",orderList.up[i], orderList.down[i],orderList.command[i]);
+	}
+}
 void initializeQueue(void){
 	for (int i=0; i<4;i++){
 		orderList.up[i]=0;
@@ -16,12 +22,6 @@ void initializeQueue(void){
 	}
 	printf("First init\n");
 	printOrders();
-}
-void printOrders(){
-	printf("Up, down, command\n");
-	for (int i=0; i<4;i++){
-		printf(" %d, %d, %d \n",orderList.up[i], orderList.down[i],orderList.command[i]);
-	}
 }
 void deleteOrder(int floor, elev_motor_direction_t dir)
 {
@@ -53,16 +53,19 @@ void order(elev_button_type_t button, int floor){
 		case BUTTON_CALL_UP:
 			if (!(orderList.up[floor])){
 				orderList.up[floor]=1;
+				elev_set_button_lamp(button,floor,1);
 			}
 			break;
 		case BUTTON_CALL_DOWN:
 			if (!(orderList.down[floor])){
 				orderList.down[floor]=1;
+				elev_set_button_lamp(button,floor,1);
 			}
 			break;
 		case BUTTON_COMMAND:
 			if (!(orderList.command[floor])){
 				orderList.command[floor]=1;
+				elev_set_button_lamp(button,floor,1);
 			}
 			break;
 	}
@@ -91,8 +94,8 @@ Returns the order on top of queue
 */
 int getNextFloor(int lastFloor, elev_motor_direction_t dir)
 {
-	int nextFloor;
-	int ctrlVal=10;
+	int nextFloor=-1;
+	int ctrlVal=5;
 	switch (dir){
 		case DIRN_UP:
 			for(int i=lastFloor;i<4;i++){

@@ -1,4 +1,4 @@
-//#include "hwAndIo.h"
+#include "hwAndIo.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "queue.h"
@@ -9,12 +9,12 @@ int main(){
 	order(BUTTON_CALL_DOWN,1);
 	order(BUTTON_COMMAND,3);
 	order(BUTTON_COMMAND,2);
-	deleteOrder(2,DIRN_STOP);
+	order(BUTTON_COMMAND,1);
+	order(BUTTON_COMMAND,0);
+	
 	printOrders();
-	int i = getNextFloor(3,DIRN_STOP);
-	printf("\nVi skal til: %d",i+1);
-
-
+	deleteAllOrders();
+	printOrders();
 
 	return 0;
 }

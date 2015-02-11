@@ -9,8 +9,7 @@ LDFLAGS = -lm
 #-lcomedi -lm
 
 # list of sources
-SOURCE = testelev.c test.c queue.c 
-#hwAndIo.c  timer.c 
+SOURCE = testelev.c test.c queue.c hwAndIo.c  timer.c 
 
 # program executable file name.
 TARGET = test

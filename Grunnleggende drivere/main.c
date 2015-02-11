@@ -12,7 +12,7 @@ int main() {
         return 1;
     }
     initializeQueue();
-
+    
     printf("Press STOP button to stop elevator and exit program.\n");
 
     setMotorDirection(DOWN);

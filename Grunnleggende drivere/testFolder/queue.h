@@ -24,7 +24,7 @@ Deletes all orders in case of stopBtn pushed
 */
 void deleteAllOrders(void);
 /*
-Returns the order on top of queue
+Returns the next floor, returns -1 if queue empty
 */
 int getNextFloor(int floor, elev_motor_direction_t dir);
 

@@ -1,7 +1,6 @@
 
 #include "hwAndIo.h"
 #include "queue.h"
-#include <stdbool.h>
 #include "timer.h"
 #include "testelev.h"
 //#include "elevatorStateMachine.h"
@@ -13,6 +12,7 @@
 
 void setMotorDirection(elev_motor_direction_t dir)
 {
+	//Husk å stoppe heisen skikkelig....
 	elev_set_motor_direction(dir);
 }
 
@@ -27,7 +27,6 @@ void doorCtrl(int ctrl)
 }
 void checkButtons(void)
 {
-	//struct stateT *tempState=getState(); ///må ha for åbestille på knapper
 	checkStopButton();
 	int floor=4,buttons=3;
 	for (int i=0; i<floor; i++)
@@ -37,15 +36,14 @@ void checkButtons(void)
 			if(elev_get_button_signal((elev_button_type_t)j,i))
 			{
 				order((elev_button_type_t)j,i);
-				elev_set_button_lamp((elev_button_type_t)j,i,1);
 			}
 		}
 	}
 }
 
-void checkStopButton(void)
+bool checkStopButton(void)
 {
-	bool stop=false;
+	bool stop=true;
 	stop=elev_get_stop_signal();
 	if(stop)
 	{
@@ -57,11 +55,13 @@ void checkStopButton(void)
 		}
 		elev_set_stop_lamp(0);
 		deleteAllOrders();
-		
+		return true;
 	}	
+	return false;
+
 }
 
-void arriveAtFloor(void)
+void arriveAtFloor()
 {
 	doorCtrl(OPEN);
 	startTimer();
@@ -69,13 +69,11 @@ void arriveAtFloor(void)
 		checkStopButton();
 		checkButtons();
 	}
-	//Logikk for å skru av bestillingslys og slette ordren fra queue.
-	struct queueNode* tempNode=getCurrentOrder(3, DIRN_DOWN);
-	//Peker / ikke peker? Hadde vert fint å bare passe denne rett til deleteOrder, slik at vi slapp å lage kopier
-	
-	deleteOrder(tempNode);
-	for (int i =0; i<3; i++){ //turns off all the indicators on this floor.
-		elev_set_button_lamp(BUTTON_COMMAND,i,1);
-	}
+	elev_motor_direction_t currentDir=(getState()).currentDir;
+	deleteOrder(getFloor(),currentDir);
 	doorCtrl(CLOSE);
+}
+
+int getFloor(){
+	return elev_get_floor_sensor_signal()
 }
