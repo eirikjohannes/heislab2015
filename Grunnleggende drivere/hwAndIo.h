@@ -4,6 +4,8 @@
 
 #include "elev.h"
 
+static bool stopButtonPushed=false;
+
 setMotorDirection(elev_motor_direction_t dir);
 
 void checkButtons(void);

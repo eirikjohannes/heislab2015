@@ -11,25 +11,16 @@ int main() {
         printf("Unable to initialize elevator hardware!\n");
         return 1;
     }
-    initializeQueue();
-    
-    printf("Press STOP button to stop elevator and exit program.\n");
+    initializeStateMachine();
 
     setMotorDirection(DOWN);
-
+    while(getFloor()!=0){
+        //do nothing at all
+    }
+    setMotorDirection(DIRN_STOP)
     while (1) {
-        // Change direction when we reach top/bottom floor
-        if (getFloor() == N_FLOORS) {
-            setMotorDirection(DOWN);
-        } else if (getFloor() == 1) {
-            setMotorDirection(UP);
-        }
+        setEvent();
 
-        // Stop elevator and exit program if the stop button is pressed
-        if (checkStopButton()) {
-            setMotorDirection(STOP);
-            break;
-        }
     }
 
     return 0;

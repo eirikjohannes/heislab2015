@@ -22,7 +22,7 @@ struct stateInfo{
  
 void initializeStateMachine(void);
 
-void setEvent(stateT desiredState, int currentFloor, elev_motor_direction_t currentDir,queueNode *currentOrderBeingExecuted);
+void setEvent();
 
 stateT getState(void);
 

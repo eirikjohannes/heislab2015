@@ -10,6 +10,7 @@
 #define OPEN 1
 #define CLOSE 0
 
+
 void setMotorDirection(elev_motor_direction_t dir)
 {
 	//Husk å stoppe heisen skikkelig....
@@ -36,6 +37,7 @@ void checkButtons(void)
 			if(elev_get_button_signal((elev_button_type_t)j,i))
 			{
 				order((elev_button_type_t)j,i);
+				stopButtonPushed=false;
 			}
 		}
 	}
@@ -47,6 +49,7 @@ bool checkStopButton(void)
 	stop=elev_get_stop_signal();
 	if(stop)
 	{
+		stopButtonPushed=true;
 		elev_set_stop_lamp(1);
 		while(stop)
 		{

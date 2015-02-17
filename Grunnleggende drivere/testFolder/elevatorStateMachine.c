@@ -19,29 +19,30 @@ void setEvent()
 	currentState.floorToReach=getNextFloor(currentState.currentFloor, currentState.currentDir);
 	if(getFloor()!=-1){
 		currentState.currentFloor=getFloor();
+		elev_set_floor_indicator(currentState.currentFloor);
 	}
 	if(currentState.currentFloor==currentState.floorToReach && currentState.state!=stopped){
-		setMotorDirection(DIRN_STOP);
+		currentState.currentDir=DIRN_STOP;
+		setMotorDirection(currentState.currentDir);
 		currentState.state=stationary;
 		arriveAtFloor();
 	}
 	else if(currentState.floorToReach>currentState.currentFloor){
-		setMotorDirection(DIRN_UP);
+		currentState.currentDir=DIRN_UP;
+		setMotorDirection(currentState.currentDir);
 		currentState.state=movingUp;
 	}
 	else if(currentState.floorToReach<currentState.currentFloor){
-		setMotorDirection(DIRN_DOWN);
+		currentState.currentDir=DIRN_DOWN;
+		setMotorDirection(currentState.currentDir);
 		currentState.state=movingDown;
 	}
-	if(checkStopButton()){
-		setMotorDirection(DIRN_STOP);
+	if(checkStopButton() || stopButtonPushed){
+		currentState.currentDir=DIRN_STOP;
+		setMotorDirection(currentState.currentDir);
 		currentState.floorToReach==currentFloor;
 		currentState.state=stopped;
 	}
-
-
-
-
 }
 
 stateT getState(void)
