@@ -1,16 +1,19 @@
 
 #include "hwAndIo.h"
 #include "queue.h"
-#include <stdbool.h>
 #include "timer.h"
+#include "testelev.h"
+//#include "elevatorStateMachine.h"
 
-#define DOWN 0;
-#define UP 1;
-#define OPEN 1;
-#define CLOSE 0;
+//#define DOWN 0
+//#define UP 1
+#define OPEN 1
+#define CLOSE 0
 
-setMotorDirection(elev_motor_direction_t dir)
+
+void setMotorDirection(elev_motor_direction_t dir)
 {
+	//Husk å stoppe heisen skikkelig....
 	elev_set_motor_direction(dir);
 }
 
@@ -31,31 +34,23 @@ void checkButtons(void)
 	{
 		for (int j=0; j<buttons; j++)
 		{
-			if(elev_get_button_signal(j,i) && j==2)
+			if ((i==0 && j==1)||(i==3&&j==0)) continue;
+			if(elev_get_button_signal((elev_button_type_t)j,i))
 			{
-				orderIn(i,getState().currentFloor,getState().currentDir);
-				elev_set_button_lamp(j,i,1);
-			}
-			else if(elev_get_button_signal(j,i) && j==1) //down btn
-			{
-				orderOut(i,DOWN,getState().currentFloor,getState().currentDir);
-				elev_set_button_lamp(j,i,1);
-			}
-			else if(elev_get_button_signal(j,i) && j==0) //up btn
-			{
-				orderOut(i,UP,getState().currentFloor,getState().currentDir);
-				elev_set_button_lamp(j,i,1);
+				order((elev_button_type_t)j,i);
+				stopButtonPushed=false;
 			}
 		}
 	}
 }
 
-void checkStopButton(void)
+bool checkStopButton(void)
 {
-	bool stop=false;
+	bool stop=true;
 	stop=elev_get_stop_signal();
 	if(stop)
 	{
+		stopButtonPushed=true;
 		elev_set_stop_lamp(1);
 		while(stop)
 		{
@@ -64,11 +59,13 @@ void checkStopButton(void)
 		}
 		elev_set_stop_lamp(0);
 		deleteAllOrders();
-		
+		return true;
 	}	
+	return false;
+
 }
 
-void arriveAtFloor(void)
+void arriveAtFloor()
 {
 	doorCtrl(OPEN);
 	startTimer();
@@ -76,12 +73,11 @@ void arriveAtFloor(void)
 		checkStopButton();
 		checkButtons();
 	}
-	//Logikk for å skru av bestillingslys og slette ordren fra queue.
-	struct queueNode* tempNode=getCurrentOrder(getState().currentFloor, getState().currentDir);
-	//Peker / ikke peker? Hadde vert fint å bare passe denne rett til deleteOrder, slik at vi slapp å lage kopier
-	deleteOrder(tempNode);
-	for (int i =0; i<3; i++){ //turns off all the indicators on this floor.
-		elev_set_button_lamp(tempNode->floor,i,1);
-	}
+	elev_motor_direction_t currentDir=(getState()).currentDir;
+	deleteOrder(getFloor(),currentDir);
 	doorCtrl(CLOSE);
+}
+
+int getFloor(){
+	return elev_get_floor_sensor_signal();
 }

@@ -2,7 +2,7 @@
 #include "queue.h"
 #include <stdlib.h>
 #include <stdio.h>
-//#include "elev.h"
+#include "elev.h"
 #include <stdbool.h>
 #include <math.h>
 
@@ -84,6 +84,7 @@ void deleteAllOrders(void){
 		elev_set_button_lamp(BUTTON_COMMAND,i,0);
 		for (int j=0; j<buttons; j++)
 		{
+			if ((i==0 && j==1)||(i==3&&j==0)) continue;
 			elev_set_button_lamp((elev_button_type_t)j,i,0);
 		}
 	}
