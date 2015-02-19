@@ -1,61 +1,89 @@
 
 #include "hwAndIo.h"
 #include "queue.h"
-#include <stdbool.h>
+#include "timer.h"
+#include "elev.h"
+#include "elevatorStateMachine.h"
+#include <stdio.h>
 
-#define DOWN=0;
-#define UP=1;
+//#define DOWN 0
+//#define UP 1
+#define OPEN 1
+#define CLOSE 0
 
-setMotorDirection(elev_motor_direction_t dir)
+
+void setMotorDirection(elev_motor_direction_t dir)
 {
+	//Her kan man eventuelt legge opp til at heisen kjører et lite milisekund ekstra for å stoppe midt på sensoren. 
 	elev_set_motor_direction(dir);
 }
 
+void doorCtrl(int ctrl)
+{
+	if (ctrl==OPEN){
+		elev_set_door_open_lamp(1);	
+	}
+	else if (ctrl==CLOSE){
+		elev_set_door_open_lamp(0);	
+	}
+}
 void checkButtons(void)
 {
+	checkStopButton();
 	int floor=4,buttons=3;
 	for (int i=0; i<floor; i++)
 	{
 		for (int j=0; j<buttons; j++)
 		{
-			if(elev_get_button_signal(j,i) && j==2)
+			if ((i==0 && j==1)||(i==3&&j==0)) continue;
+			if(elev_get_button_signal((elev_button_type_t)j,i))
 			{
-				orderIn(i,getState().currentFloor,getState().currentDir);
-				elev_set_button_lamp(j,i,1);
-			}
-			else if(elev_get_button_signal(j,i) && j==1) //down btn
-			{
-				orderOut(i,DOWN,getState().currentFloor,getState().currentDir);
-				elev_set_button_lamp(j,i,1);
-			}
-			else if(elev_get_button_signal(j,i) && j==0) //up btn
-			{
-				orderOut(i,UP,getState().currentFloor,getState().currentDir);
-				elev_set_button_lamp(j,i,1);
+				order((elev_button_type_t)j,i);
+				stopButtonPushed=false;
 			}
 		}
 	}
 }
 
-void checkStopButton(void)
+bool checkStopButton(void)
 {
-	bool stop=false;
+	bool stop=true;
 	stop=elev_get_stop_signal();
 	if(stop)
 	{
+		stopButtonPushed=true;
 		elev_set_stop_lamp(1);
+		if(getFloor()!=-1){
+			doorCtrl(OPEN);
+		}
+		deleteAllOrders();
 		while(stop)
 		{
 			elev_set_motor_direction(DIRN_STOP);
 			stop=elev_get_stop_signal();
 		}
 		elev_set_stop_lamp(0);
-		deleteAllOrders();
-		
+		if(getFloor()!=-1){
+			arriveAtFloor();
+		}
+		return true;
 	}	
+	return false;
+
 }
 
-void arriveAtFloor(void)
+void arriveAtFloor()
 {
-	
+	doorCtrl(OPEN);
+	startTimer();
+	while(!timerIsDone()){
+		checkStopButton();
+		checkButtons();
+	}
+	deleteOrder(getState().currentFloor,getState().currentDir);
+	doorCtrl(CLOSE);
+}
+
+int getFloor(){
+	return elev_get_floor_sensor_signal();
 }

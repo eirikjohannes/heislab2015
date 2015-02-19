@@ -1,34 +1,29 @@
 
-#include "elevWrap.h"
+#include "elev.h"
 #include "channels.h"
 #include "io.h"
+#include "elevatorStateMachine.h"
 #include <stdio.h>
 
 
 int main() {
     // Initialize hardware
-    if (!elevInit()) {
+    if (!elev_init()) {
         printf("Unable to initialize elevator hardware!\n");
         return 1;
     }
+    
 
-    printf("Press STOP button to stop elevator and exit program.\n");
-
-    setMotorDirection(DOWN);
-
+    setMotorDirection(DIRN_DOWN);
+    while(getFloor()!=0){
+        printf("Getfloor returnerer: %d\n",getFloor());
+    }
+    setMotorDirection(DIRN_STOP);
+    initializeStateMachine();
+    printf("\nElevator is now initialized\n");
     while (1) {
-        // Change direction when we reach top/bottom floor
-        if (getFloor() == N_FLOORS) {
-            setMotorDirection(DOWN);
-        } else if (getFloor() == 1) {
-            setMotorDirection(UP);
-        }
+        setEvent();
 
-        // Stop elevator and exit program if the stop button is pressed
-        if (checkStopButton()) {
-            setMotorDirection(STOP);
-            break;
-        }
     }
 
     return 0;
