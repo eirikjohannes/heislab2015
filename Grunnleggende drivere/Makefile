@@ -2,13 +2,13 @@
 CC = clang
 
 # Compiler flags go here.
-CFLAGS = -g -Wall
+CFLAGS = -std=c11 -g -Wall 
 
 # Linker flags go here.
 LDFLAGS = -lcomedi -lm
 
 # list of sources
-ELEVSRC = elev.c io.c main.c
+ELEVSRC = elev.c io.c elevatorStateMachine.c queue.c hwAndIo.c timer.c main.c
 
 # program executable file name.
 TARGET = heis

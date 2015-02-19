@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_STATEMACHINE_H__
 #define __INCLUDE_STATEMACHINE_H__
 
-#include "testelev.h"
+#include "elev.h"
 #include <stdbool.h>
 #include "hwAndIo.h"
 
@@ -14,17 +14,18 @@ typedef enum state{
 	numberOfStates
 } stateT;
 
-struct stateInfo{
+struct stateInfoT{
 	stateT state;
 	int floorToReach, currentFloor;
 	elev_motor_direction_t currentDir;
-}stateInfoT;
+	elev_motor_direction_t currentMotorDir;
+};
  
 void initializeStateMachine(void);
 
 void setEvent();
 
-stateT getState(void);
+struct stateInfoT getState(void);
 
 
 

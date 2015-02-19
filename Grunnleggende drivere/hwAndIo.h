@@ -3,14 +3,15 @@
 #define __HW_IO_H__
 
 #include "elev.h"
+#include <stdbool.h>
 
 static bool stopButtonPushed=false;
 
-setMotorDirection(elev_motor_direction_t dir);
+void setMotorDirection(elev_motor_direction_t dir);
 
 void checkButtons(void);
 
-void checkStopButton(void);
+bool checkStopButton(void);
 
 void arriveAtFloor(void);
 

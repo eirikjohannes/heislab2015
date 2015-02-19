@@ -2,8 +2,9 @@
 #include "hwAndIo.h"
 #include "queue.h"
 #include "timer.h"
-#include "testelev.h"
-//#include "elevatorStateMachine.h"
+#include "elev.h"
+#include "elevatorStateMachine.h"
+#include <stdio.h>
 
 //#define DOWN 0
 //#define UP 1
@@ -13,7 +14,7 @@
 
 void setMotorDirection(elev_motor_direction_t dir)
 {
-	//Husk å stoppe heisen skikkelig....
+	//Her kan man eventuelt legge opp til at heisen kjører et lite milisekund ekstra for å stoppe midt på sensoren. 
 	elev_set_motor_direction(dir);
 }
 
@@ -52,13 +53,19 @@ bool checkStopButton(void)
 	{
 		stopButtonPushed=true;
 		elev_set_stop_lamp(1);
+		if(getFloor()!=-1){
+			doorCtrl(OPEN);
+		}
+		deleteAllOrders();
 		while(stop)
 		{
 			elev_set_motor_direction(DIRN_STOP);
 			stop=elev_get_stop_signal();
 		}
 		elev_set_stop_lamp(0);
-		deleteAllOrders();
+		if(getFloor()!=-1){
+			arriveAtFloor();
+		}
 		return true;
 	}	
 	return false;
@@ -73,8 +80,7 @@ void arriveAtFloor()
 		checkStopButton();
 		checkButtons();
 	}
-	elev_motor_direction_t currentDir=(getState()).currentDir;
-	deleteOrder(getFloor(),currentDir);
+	deleteOrder(getState().currentFloor,getState().currentDir);
 	doorCtrl(CLOSE);
 }
 

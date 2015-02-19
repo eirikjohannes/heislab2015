@@ -2,7 +2,7 @@
 #include "queue.h"
 #include <stdlib.h>
 #include <stdio.h>
-//#include "elev.h"
+#include "elev.h"
 #include <stdbool.h>
 #include <math.h>
 
@@ -25,6 +25,7 @@ void initializeQueue(void){
 }
 void deleteOrder(int floor, elev_motor_direction_t dir)
 {
+	printf("Wanted direction is: %d\n",dir);
 	//Direction check?
 	switch(dir){
 		case DIRN_UP:
@@ -32,16 +33,33 @@ void deleteOrder(int floor, elev_motor_direction_t dir)
 			orderList.command[floor]=0;
 			elev_set_button_lamp(BUTTON_COMMAND,floor,0);
 			elev_set_button_lamp(BUTTON_CALL_UP,floor,0);
+			if(floor!=3&&floor!=0)
+			{
+				orderList.down[floor]=0;
+				elev_set_button_lamp(BUTTON_CALL_DOWN,floor,0);
+			}
 			break;
 		case DIRN_DOWN:
 			orderList.down[floor]=0;
 			orderList.command[floor]=0;
 			elev_set_button_lamp(BUTTON_COMMAND,floor,0);
 			elev_set_button_lamp(BUTTON_CALL_DOWN,floor,0);
+			if(floor!=0&&floor!=3)
+			{
+				orderList.up[floor]=0;
+				elev_set_button_lamp(BUTTON_CALL_UP,floor,0);
+			}			
 			break;
 		case DIRN_STOP:
-			orderList.command[floor]=0;
+			orderList.command[floor]=0;	
 			elev_set_button_lamp(BUTTON_COMMAND,floor,0);
+			if(floor==1||floor==2)
+			{
+				elev_set_button_lamp(BUTTON_CALL_DOWN,floor,0);
+				orderList.down[floor]=0;
+				orderList.up[floor]=0;
+				elev_set_button_lamp(BUTTON_CALL_UP,floor,0);
+			}
 			break;
 	}
 }
@@ -69,7 +87,7 @@ void order(elev_button_type_t button, int floor){
 			}
 			break;
 	}
-	printOrders();
+	
 }
 /*
 Deletes all orders in case of stopBtn pushed
@@ -84,6 +102,7 @@ void deleteAllOrders(void){
 		elev_set_button_lamp(BUTTON_COMMAND,i,0);
 		for (int j=0; j<buttons; j++)
 		{
+			if ((i==0 && j==1)||(i==3&&j==0)) continue;
 			elev_set_button_lamp((elev_button_type_t)j,i,0);
 		}
 	}
@@ -94,36 +113,67 @@ Returns the order on top of queue
 */
 int getNextFloor(int lastFloor, elev_motor_direction_t dir)
 {
-	int nextFloor;
-	int ctrlVal=10;
+	int nextFloor=-1;
+	int ctrlVal=5;
 	switch (dir){
+		case DIRN_DOWN:
+			for(int i=lastFloor;i>=0;i--){
+				if(orderList.down[i] || orderList.command[i])
+				{	
+					nextFloor=i;
+					return nextFloor;
+				}
+			}
+			for(int i=0;i<4;i++)
+			{
+				if(orderList.up[i])
+				{
+					if(abs(lastFloor-i)<ctrlVal)
+					{
+						ctrlVal=abs(lastFloor-i);
+						nextFloor=i;
+						break;
+					}
+				}
+			}
+			break;
 		case DIRN_UP:
 			for(int i=lastFloor;i<4;i++){
 				if(orderList.up[i] || orderList.command[i])
 				{
 					nextFloor=i;
+					return nextFloor;
+				}
+		
+			}
+			for(int i=0;i<4;i++)
+			{
+				if(orderList.down[i])
+				{
+					if(abs(lastFloor-i)<ctrlVal)
+					{
+						ctrlVal=abs(lastFloor-i);
+						nextFloor=i;
+						break;
+					}
 				}
 			}
+			//If no values were found in this direction, check DIRN_DOWN	
 			break;
 		case DIRN_STOP:
-			for(int i=0;i<4;i++){
+			for(int i=0;i<4;i++)
+			{
 				if(orderList.command[i] || orderList.up[i] || orderList.down[i])
 				{
-					if(abs(lastFloor-i)<ctrlVal){
+					if(abs(lastFloor-i)<ctrlVal)
+					{
 						ctrlVal=abs(lastFloor-i);
 						nextFloor=i;
 					}
 				}
 			}	
-			break;
-		case DIRN_DOWN:
-			for(int i=lastFloor;i>=0;i--){
-					if(orderList.down[i] || orderList.command[i])
-					{
-						nextFloor=i;
-					}
-				}
-			break;
+
+			
 	}
 	return nextFloor;
 }

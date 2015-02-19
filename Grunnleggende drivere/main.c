@@ -1,23 +1,26 @@
 
-#include "elevWrap.h"
+#include "elev.h"
 #include "channels.h"
 #include "io.h"
+#include "elevatorStateMachine.h"
 #include <stdio.h>
 
 
 int main() {
     // Initialize hardware
-    if (!elevInit()) {
+    if (!elev_init()) {
         printf("Unable to initialize elevator hardware!\n");
         return 1;
     }
-    initializeStateMachine();
+    
 
-    setMotorDirection(DOWN);
+    setMotorDirection(DIRN_DOWN);
     while(getFloor()!=0){
-        //do nothing at all
+        printf("Getfloor returnerer: %d\n",getFloor());
     }
-    setMotorDirection(DIRN_STOP)
+    setMotorDirection(DIRN_STOP);
+    initializeStateMachine();
+    printf("\nElevator is now initialized\n");
     while (1) {
         setEvent();
 
