@@ -91,9 +91,7 @@ void order(elev_button_type_t button, int floor){
 	}
 
 }
-/*
-   Deletes all orders in case of stopBtn pushed
- */
+
 void deleteAllOrders(void){
 	for (int i=0; i<numberOfFloors; i++)
 	{

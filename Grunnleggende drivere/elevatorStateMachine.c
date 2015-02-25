@@ -3,8 +3,6 @@
 	StateMachine logic for elevator
 	Sivert and Eirik - 2015
 */
-
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -51,12 +49,10 @@ void initializeElevator(void){
 		printf("Unable to initialize elevator hardware!\n");
 		exit(1);
 	}
-
 	setMotorDirection(DIRN_DOWN); 
 	while(getFloor() == -1){ /* Between floors */ }
 	setMotorDirection(DIRN_STOP);
 
-	/*Initializes the statemachine*/
 	initializeQueue();
 	currentState.state=stationary;
 	currentState.currentFloor=getFloor();
@@ -67,7 +63,7 @@ void initializeElevator(void){
 	printf("\nElevator is now initialized\n");
 }
 
-void setEvent(EventT input){
+void setState(EventT input){
 	switch (input){
 		case stop:
 			//currentState.currentDir=DIRN_STOP;
@@ -77,12 +73,12 @@ void setEvent(EventT input){
 			
 			if (getFloorToReach() == getLastFloor() && getFloor() == -1){
 				if (currentState.currentDir == DIRN_DOWN)
-					setEvent(desiredFloorAbove);
+					setState(desiredFloorAbove);
 				else 
-					setEvent(desiredFloorBelow);
+					setState(desiredFloorBelow);
 			}
 			else if(getFloorToReach() != -1){
-				setEvent(stationaryNoOrder);
+				setState(stationaryNoOrder);
 			}
 			
 			printf("stopped\n");
@@ -129,7 +125,7 @@ void setEvent(EventT input){
 			break;
 			
 		default:
-			printf("Something went worng in function setEvent()\n");
+			printf("Something went worng in function setState()\n");
 			break;
 	}
 }

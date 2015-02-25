@@ -45,7 +45,7 @@ elev_motor_direction_t getDesiredDir(void);
 elev_motor_direction_t getMotorDir(void);
 
 //sets the state needed to handle event
-void setEvent( EventT input);
+void setState( EventT input);
 
 StateT getState(void);
 

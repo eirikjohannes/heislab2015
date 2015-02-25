@@ -9,7 +9,6 @@
 #include "elev.h"
 #include "elevatorStateMachine.h"
 
-
 #define OPEN 1
 #define CLOSE 0
 
@@ -21,12 +20,9 @@ int getFloor(void){	return elev_get_floor_sensor_signal(); }
 
 void setMotorDirection(elev_motor_direction_t dir)
 {
-	//may eventually add delay so that elevator cart 
-	//stops at center of floor sensor
 	elev_set_motor_direction(dir);
 }
 
-//Private function for turning on/of the opendoor light
 void doorCtrl(int ctrl)
 {
 	if (ctrl==OPEN){
@@ -78,7 +74,6 @@ bool checkStopButton(void)
 		return true;
 	}	
 	return false;
-
 }
 
 void arriveAtFloor()
