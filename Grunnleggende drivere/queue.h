@@ -1,4 +1,8 @@
-
+/*
+	queue.h
+	Queuelogic, handling orders
+	Sivert and Eirik - 2015
+*/
 #ifndef __queue_h__
 #define __queue_h__
 

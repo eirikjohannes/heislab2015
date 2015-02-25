@@ -1,3 +1,9 @@
+/*
+	queue.c
+	Queuelogic, handling orders
+	Sivert and Eirik - 2015
+*/
+	
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

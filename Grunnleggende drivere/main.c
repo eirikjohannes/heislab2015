@@ -1,3 +1,11 @@
+/*
+	main.c
+	Elevatorproject-TTK4125
+	Main loop for running elevator
+	Controls next "state" for elevator
+	Sivert and Eirik - 2015
+*/
+
 #include "elev.h"
 #include "channels.h"
 #include "io.h"

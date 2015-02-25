@@ -1,3 +1,8 @@
+/*
+	hwAndIo.c
+	Hardware and input/output interface
+	Sivert and Eirik - 2015
+*/
 #include "hwAndIo.h"
 #include "queue.h"
 #include "timer.h"

@@ -1,4 +1,8 @@
-
+/*
+	hwAndIo.h
+	Hardware and input/output interface
+	Sivert and Eirik - 2015
+*/
 #ifndef __HW_IO_H__
 #define __HW_IO_H__
 

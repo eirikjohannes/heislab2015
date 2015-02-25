@@ -1,3 +1,10 @@
+/*
+	elevatorStateMachine.c
+	StateMachine logic for elevator
+	Sivert and Eirik - 2015
+*/
+
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>

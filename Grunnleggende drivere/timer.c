@@ -1,3 +1,8 @@
+/*
+	timer.c
+	Simple 3 second timer
+	Sivert and Eirik - 2015
+*/
 #include <time.h>
 
 #include "timer.h"

@@ -1,4 +1,8 @@
-
+/*
+	elevatorStateMachine.h
+	StateMachine logic for elevator
+	Sivert and Eirik - 2015
+*/
 #ifndef __INCLUDE_STATEMACHINE_H__
 #define __INCLUDE_STATEMACHINE_H__
 
