@@ -4,12 +4,10 @@
 //
 // 2006, Martin Korsgaard
 
+#include <comedilib.h>
 
 #include "io.h"
 #include "channels.h"
-
-#include <comedilib.h>
-
 
 static comedi_t *it_g = NULL;
 

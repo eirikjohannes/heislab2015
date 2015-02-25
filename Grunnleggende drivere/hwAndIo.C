@@ -1,23 +1,27 @@
-
 #include "hwAndIo.h"
 #include "queue.h"
 #include "timer.h"
 #include "elev.h"
 #include "elevatorStateMachine.h"
-#include <stdio.h>
 
-//#define DOWN 0
-//#define UP 1
+
 #define OPEN 1
 #define CLOSE 0
 
+static bool stopButtonPushed = false;
+
+bool getStopButtonSignal(void){ return stopButtonPushed; }
+
+int getFloor(void){	return elev_get_floor_sensor_signal(); }
 
 void setMotorDirection(elev_motor_direction_t dir)
 {
-	//Her kan man eventuelt legge opp til at heisen kjører et lite milisekund ekstra for å stoppe midt på sensoren. 
+	//may eventually add delay so that elevator cart 
+	//stops at center of floor sensor
 	elev_set_motor_direction(dir);
 }
 
+//Private function for turning on/of the opendoor light
 void doorCtrl(int ctrl)
 {
 	if (ctrl==OPEN){
@@ -27,15 +31,15 @@ void doorCtrl(int ctrl)
 		elev_set_door_open_lamp(0);	
 	}
 }
+
 void checkButtons(void)
 {
-	checkStopButton();
-	int floor=4,buttons=3;
-	for (int i=0; i<floor; i++)
+	for (int i=0; i<numberOfFloors; i++)
 	{
-		for (int j=0; j<buttons; j++)
+		for (int j=0; j<numberOfButtons; j++)
 		{
-			if ((i==0 && j==1)||(i==3&&j==0)) continue;
+			if ((i==0 && j==BUTTON_CALL_DOWN)||
+			(i==(numberOfFloors-1)&&j==BUTTON_CALL_UP)) continue;
 			if(elev_get_button_signal((elev_button_type_t)j,i))
 			{
 				order((elev_button_type_t)j,i);
@@ -75,15 +79,14 @@ bool checkStopButton(void)
 void arriveAtFloor()
 {
 	doorCtrl(OPEN);
+	printOrders();
 	startTimer();
+	
 	while(!timerIsDone()){
 		checkStopButton();
 		checkButtons();
 	}
-	deleteOrder(getState().currentFloor,getState().currentDir);
+	deleteOrder(getLastFloor(),getDesiredDir());
 	doorCtrl(CLOSE);
-}
-
-int getFloor(){
-	return elev_get_floor_sensor_signal();
+	printOrders();
 }

@@ -6,28 +6,29 @@
 #include "elev.h"
 
 
-
 struct orderL{
-	bool up[4];
-	bool command[4];
-	bool down[4];
+	bool up[numberOfFloors];
+	bool command[numberOfFloors];
+	bool down[numberOfFloors];
 };
 
+//sets queue to empty
 void initializeQueue(void);
+
+//prints queue for debugging
 void printOrders();
 
+//asigns order to correct part in queue
 void order(elev_button_type_t button, int floor);
 
+//deletes one order at given floor, with given direction 
 void deleteOrder(int floor, elev_motor_direction_t dir);
-/*
-Deletes all orders in case of stopBtn pushed
-*/
-void deleteAllOrders(void);
-/*
-Returns the order on top of queue
-*/
-int getNextFloor(int floor, elev_motor_direction_t dir);
 
+//Deletes all orders in queue
+void deleteAllOrders(void);
+
+//Returns index of next floor to reach, -1 if queue is empty
+int getNextFloor(int floor, elev_motor_direction_t dir);
 
 
 #endif //__queue_h__

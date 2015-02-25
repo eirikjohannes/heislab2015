@@ -4,16 +4,10 @@
 
 #include <stdbool.h>
 
-
-/*
-Checks if three seconds have passed
-*/
+//Returns true if 3 secons has passed, false otherwise
 bool timerIsDone(void);
 
-
+//Starts timer
 void startTimer(void);
-
-
-
 
 #endif //__timer_h__

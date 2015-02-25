@@ -2,30 +2,53 @@
 #ifndef __INCLUDE_STATEMACHINE_H__
 #define __INCLUDE_STATEMACHINE_H__
 
-#include "elev.h"
 #include <stdbool.h>
+
+#include "elev.h"
 #include "hwAndIo.h"
 
-typedef enum state{
+typedef enum State{
 	movingUp,
 	movingDown,
 	stationary,
-	stopped,
-	numberOfStates
-} stateT;
+	stopped
+}StateT;
+
+typedef enum Event{
+	stop,
+	stationaryNoOrder,
+	arrivesAtDesiredFloor,
+	desiredFloorAbove,
+	desiredFloorBelow
+}EventT;
 
 struct stateInfoT{
-	stateT state;
+	StateT state;
 	int floorToReach, currentFloor;
 	elev_motor_direction_t currentDir;
 	elev_motor_direction_t currentMotorDir;
 };
- 
-void initializeStateMachine(void);
 
-void setEvent();
+//initializes the elevator from scratch
+void initializeElevator(void);
 
-struct stateInfoT getState(void);
+int getFloorToReach(void);
+
+int getLastFloor(void);
+
+elev_motor_direction_t getDesiredDir(void);
+
+elev_motor_direction_t getMotorDir(void);
+
+//sets the state needed to handle event
+void setEvent( EventT input);
+
+StateT getState(void);
+
+//updates currentFloor, floorToReach, stopstatus and sets floor indicator
+void updateFloorStatus(int floorSensorSignal);
+
+
 
 
 

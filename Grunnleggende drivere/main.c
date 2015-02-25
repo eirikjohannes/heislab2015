@@ -1,30 +1,43 @@
-
 #include "elev.h"
 #include "channels.h"
 #include "io.h"
 #include "elevatorStateMachine.h"
-#include <stdio.h>
 
 
-int main() {
-    // Initialize hardware
-    if (!elev_init()) {
-        printf("Unable to initialize elevator hardware!\n");
-        return 1;
-    }
-    
+int main() 
+{
 
-    setMotorDirection(DIRN_DOWN);
-    while(getFloor()!=0){
-        printf("Getfloor returnerer: %d\n",getFloor());
-    }
-    setMotorDirection(DIRN_STOP);
-    initializeStateMachine();
-    printf("\nElevator is now initialized\n");
-    while (1) {
-        setEvent();
+	// Initialize hardware
+	initializeElevator();
 
-    }
+	while (1)
+	{
+		int floorSensor = getFloor(); //buffer
+		
+		checkButtons();
+		checkStopButton();
+		updateFloorStatus(floorSensor);
 
-    return 0;
+		//if the stop button has been pushed
+		if(getState() == stopped)
+			setEvent(stop);
+
+		//While we dont have any orders, and the elevator isnt stopped by the stop button
+		else if(getFloorToReach() == -1 )
+			setEvent(stationaryNoOrder);
+
+		//Arrives at the correct floor
+		else if(getLastFloor() == getFloorToReach() && floorSensor != -1)
+			setEvent(arrivesAtDesiredFloor);
+
+		//If floor to reach is above the current floor
+		else if(getFloorToReach() > getLastFloor() && getFloorToReach() != -1)
+			setEvent(desiredFloorAbove);
+
+		//if the floor to reach is below the current floor
+		else if(getFloorToReach() < getLastFloor() && getFloorToReach() != -1)
+			setEvent(desiredFloorBelow);
+	}
+	return 0;
 }
+

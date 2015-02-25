@@ -1,113 +1,128 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
 
 #include "elevatorStateMachine.h"
-#include <stdio.h>
-
+#include "queue.h"
 
 static struct stateInfoT currentState;
 
-
+//Private function used when initializing
 void initializeStateMachine()
 {
-	//remember to init elev before doing this!
 	initializeQueue();
 	currentState.state=stationary;
-	currentState.currentFloor=0;
-	currentState.floorToReach=0;
+	currentState.currentFloor=getFloor();
+	currentState.floorToReach=-1;
 	currentState.currentDir=DIRN_STOP;
 	currentState.currentMotorDir=DIRN_STOP;
 }
 
-void setEvent()
-{	
-	int floorSensor=0;
-	floorSensor=getFloor();
-	if(floorSensor!=-1)
+StateT getState(void){ return currentState.state; }
+
+int getFloorToReach(void){ return currentState.floorToReach; }
+
+int getLastFloor(void){ return currentState.currentFloor; }
+
+elev_motor_direction_t getDesiredDir(void) { return currentState.currentDir; }
+
+elev_motor_direction_t getMotorDir(void) { return currentState.currentMotorDir; }
+
+void updateFloorStatus(int floorSensorSignal){
+	if(floorSensorSignal != -1)
 	{
-		currentState.currentFloor=floorSensor;
-		elev_set_floor_indicator(currentState.currentFloor);
+		currentState.currentFloor=floorSensorSignal;
+		elev_set_floor_indicator(floorSensorSignal);
 	}
-	
-	
-	checkButtons();
 	currentState.floorToReach=getNextFloor(currentState.currentFloor, currentState.currentDir);
-	
-	
-	
-	//Checking the stopbutton
-	if(checkStopButton() || stopButtonPushed){
+	if (getStopButtonSignal())
+		currentState.state = stopped;
+}
 
-		currentState.currentMotorDir=DIRN_STOP;
-		setMotorDirection(currentState.currentMotorDir);
-		currentState.floorToReach=-1;
-		currentState.state=stopped;
-	}
-	//Updating the floor indicator and the currentfloor status
-	
-	
-	//While we dont have any orders, and the elevator isnt stopped by the stop button
-	if(currentState.floorToReach==-1 && currentState.state!=stopped)//&& getFloor()!=-1)
-	{
-		
-		currentState.currentDir=DIRN_STOP;
-		currentState.currentMotorDir=DIRN_STOP;
-		setMotorDirection(currentState.currentDir);
-		currentState.state=stationary;
+void initializeElevator(void){
+	if (!elev_init()) {
+		printf("Unable to initialize elevator hardware!\n");
+		exit(1);
 	}
 
-		//Arrives at the correct floor
-	else if(currentState.currentFloor==currentState.floorToReach && 
-	currentState.state!=stopped &&currentState.floorToReach!=-1 &&floorSensor!=-1)
-	{
-		currentState.currentMotorDir=DIRN_STOP;
-		setMotorDirection(currentState.currentMotorDir);
-		currentState.state=stationary;
-		
-		if(currentState.currentFloor==3)
-			currentState.currentDir=DIRN_DOWN;
-		if(currentState.currentFloor==0)
+	setMotorDirection(DIRN_DOWN); 
+	while(getFloor() == -1){ /* Between floors */ }
+	setMotorDirection(DIRN_STOP);
+
+	/*Initializes the statemachine*/
+	initializeQueue();
+	currentState.state=stationary;
+	currentState.currentFloor=getFloor();
+	currentState.floorToReach=-1;
+	currentState.currentDir=DIRN_STOP;
+	currentState.currentMotorDir=DIRN_STOP;
+
+	printf("\nElevator is now initialized\n");
+}
+
+void setEvent(EventT input){
+	switch (input){
+		case stop:
+			//currentState.currentDir=DIRN_STOP;
+			currentState.currentMotorDir=DIRN_STOP;
+			setMotorDirection(currentState.currentMotorDir);
+			currentState.state=stopped;
+			
+			if (getFloorToReach() == getLastFloor() && getFloor() == -1){
+				if (currentState.currentDir == DIRN_DOWN)
+					setEvent(desiredFloorAbove);
+				else 
+					setEvent(desiredFloorBelow);
+			}
+			else if(getFloorToReach() != -1){
+				setEvent(stationaryNoOrder);
+			}
+			
+			printf("stopped\n");
+					
+			break;
+			
+		case stationaryNoOrder:
+			currentState.currentDir=DIRN_STOP;
+			currentState.currentMotorDir=DIRN_STOP;
+			setMotorDirection(currentState.currentDir);
+			currentState.state=stationary;
+			printf("stationaryNoOrder\n");
+			break;
+			
+		case arrivesAtDesiredFloor:
+			currentState.currentMotorDir=DIRN_STOP;
+			setMotorDirection(currentState.currentMotorDir);
+			currentState.state=stationary;
+
+			if(currentState.currentFloor==3)
+				currentState.currentDir=DIRN_DOWN;
+			if(currentState.currentFloor==0)
+				currentState.currentDir=DIRN_UP;
+
+			printf("kjorer arrive at floor\n");
+			arriveAtFloor();
+			printf("arrivesAtDesiredFloor\n");
+			break;
+			
+		case desiredFloorAbove:
 			currentState.currentDir=DIRN_UP;
-		printf("kjorer arrive at floor\n");
-		arriveAtFloor();
-	}
-
-	//If the elevator is stuck between floors after stopbuttonevent, do this
-	else if(currentState.state==stopped && floorSensor==-1 && 
-	currentState.floorToReach==currentState.currentFloor)
-	{
-		//Invertering av retning
-		currentState.currentDir=((elev_motor_direction_t)((currentState.currentDir)*-1));
-		currentState.currentMotorDir=currentState.currentDir;		
-		setMotorDirection(currentState.currentMotorDir);
-		if(currentState.currentMotorDir)
-			currentState.state=movingDown;
-		else
+			currentState.currentMotorDir=DIRN_UP;
+			setMotorDirection(currentState.currentMotorDir);
 			currentState.state=movingUp;
+			printf("desiredFloorAbove\n");
+			break;
+			
+		case desiredFloorBelow:
+			currentState.currentDir=DIRN_DOWN;
+			currentState.currentMotorDir=DIRN_DOWN;
+			setMotorDirection(currentState.currentDir);
+			currentState.state=movingDown;
+			printf("desiredFloorBelow\n");
+			break;
+			
+		default:
+			printf("Something went worng in function setEvent()\n");
+			break;
 	}
-
-	//If floor to reach is above the current floor
-	else if(currentState.floorToReach>currentState.currentFloor 
-	&&currentState.floorToReach!=-1){
-		currentState.currentDir=DIRN_UP;
-		currentState.currentMotorDir=DIRN_UP;
-		setMotorDirection(currentState.currentMotorDir);
-		currentState.state=movingUp;
-	}
-	//if the floor to reach is below the current floor
-	else if(currentState.floorToReach<currentState.currentFloor
-	 &&currentState.floorToReach!=-1){
-	 	printf("Got here, eirik was right somehow\n");
-		currentState.currentDir=DIRN_DOWN;
-		currentState.currentMotorDir=DIRN_DOWN;
-		setMotorDirection(currentState.currentDir);
-		currentState.state=movingDown;
-	}
-	
 }
-
-struct stateInfoT getState(void)
-{
-	return currentState;
-}
-
-
-

@@ -1,21 +1,18 @@
-
-#include "queue.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "elev.h"
-#include <stdbool.h>
 #include <math.h>
+#include "queue.h"
 
 static struct orderL orderList;
 
 void printOrders(){
 	printf("Up, down, command\n");
-	for (int i=0; i<4;i++){
+	for (int i=0; i<numberOfFloors;i++){
 		printf(" %d, %d, %d \n",orderList.up[i], orderList.down[i],orderList.command[i]);
 	}
 }
 void initializeQueue(void){
-	for (int i=0; i<4;i++){
+	for (int i=0; i<numberOfFloors;i++){
 		orderList.up[i]=0;
 		orderList.down[i]=0;
 		orderList.command[i]=0;
@@ -23,17 +20,17 @@ void initializeQueue(void){
 	printf("First init\n");
 	printOrders();
 }
+
+
 void deleteOrder(int floor, elev_motor_direction_t dir)
 {
-	printf("Wanted direction is: %d\n",dir);
-	//Direction check?
 	switch(dir){
 		case DIRN_UP:
 			orderList.up[floor]=0;
 			orderList.command[floor]=0;
 			elev_set_button_lamp(BUTTON_COMMAND,floor,0);
 			elev_set_button_lamp(BUTTON_CALL_UP,floor,0);
-			if(floor!=3&&floor!=0)
+			if(floor!=(numberOfFloors-1)&&floor!=0)
 			{
 				orderList.down[floor]=0;
 				elev_set_button_lamp(BUTTON_CALL_DOWN,floor,0);
@@ -44,7 +41,7 @@ void deleteOrder(int floor, elev_motor_direction_t dir)
 			orderList.command[floor]=0;
 			elev_set_button_lamp(BUTTON_COMMAND,floor,0);
 			elev_set_button_lamp(BUTTON_CALL_DOWN,floor,0);
-			if(floor!=0&&floor!=3)
+			if(floor!=0&&floor!=(numberOfFloors-1))
 			{
 				orderList.up[floor]=0;
 				elev_set_button_lamp(BUTTON_CALL_UP,floor,0);
@@ -53,7 +50,7 @@ void deleteOrder(int floor, elev_motor_direction_t dir)
 		case DIRN_STOP:
 			orderList.command[floor]=0;	
 			elev_set_button_lamp(BUTTON_COMMAND,floor,0);
-			if(floor==1||floor==2)
+			if(floor!=0||floor!=(numberOfFloors-1))
 			{
 				elev_set_button_lamp(BUTTON_CALL_DOWN,floor,0);
 				orderList.down[floor]=0;
@@ -64,9 +61,8 @@ void deleteOrder(int floor, elev_motor_direction_t dir)
 	}
 }
 
-//Floor is between 0 and 3
+//Floor is between 0 and numberOfButtons
 void order(elev_button_type_t button, int floor){
-	//Checks if order already placed, calls addOrder if not.
 	switch (button){
 		case BUTTON_CALL_UP:
 			if (!(orderList.up[floor])){
@@ -87,34 +83,33 @@ void order(elev_button_type_t button, int floor){
 			}
 			break;
 	}
-	
+
 }
 /*
-Deletes all orders in case of stopBtn pushed
-*/
+   Deletes all orders in case of stopBtn pushed
+ */
 void deleteAllOrders(void){
-	int floor=4,buttons=3;
-	for (int i=0; i<floor; i++)
+	for (int i=0; i<numberOfFloors; i++)
 	{
 		orderList.up[i]=0;
 		orderList.down[i]=0;
 		orderList.command[i]=0;
 		elev_set_button_lamp(BUTTON_COMMAND,i,0);
-		for (int j=0; j<buttons; j++)
+		for (int j=0; j<numberOfButtons; j++)
 		{
-			if ((i==0 && j==1)||(i==3&&j==0)) continue;
+			if ((i==0 && j==BUTTON_CALL_DOWN)||
+			(i==(numberOfFloors-1)&&j==BUTTON_CALL_UP)) continue;
 			elev_set_button_lamp((elev_button_type_t)j,i,0);
 		}
 	}
 }
 
-/*
-Returns the order on top of queue
-*/
+
 int getNextFloor(int lastFloor, elev_motor_direction_t dir)
 {
 	int nextFloor=-1;
-	int ctrlVal=5;
+	int ctrlVal=numberOfFloors+1;
+	//If no values were found in the given direction, check all the other buttons
 	switch (dir){
 		case DIRN_DOWN:
 			for(int i=lastFloor;i>=0;i--){
@@ -124,9 +119,9 @@ int getNextFloor(int lastFloor, elev_motor_direction_t dir)
 					return nextFloor;
 				}
 			}
-			for(int i=0;i<4;i++)
+			for(int i=0;i<numberOfFloors;i++)
 			{
-				if(orderList.up[i])
+				if(orderList.down[i]||orderList.command[i]||orderList.up[i])
 				{
 					if(abs(lastFloor-i)<ctrlVal)
 					{
@@ -138,17 +133,17 @@ int getNextFloor(int lastFloor, elev_motor_direction_t dir)
 			}
 			break;
 		case DIRN_UP:
-			for(int i=lastFloor;i<4;i++){
+			for(int i=lastFloor;i<numberOfFloors;i++){
 				if(orderList.up[i] || orderList.command[i])
 				{
 					nextFloor=i;
 					return nextFloor;
 				}
-		
+
 			}
-			for(int i=0;i<4;i++)
+			for(int i=0;i<numberOfFloors;i++)
 			{
-				if(orderList.down[i])
+				if(orderList.down[i]||orderList.command[i]||orderList.up[i])
 				{
 					if(abs(lastFloor-i)<ctrlVal)
 					{
@@ -157,11 +152,10 @@ int getNextFloor(int lastFloor, elev_motor_direction_t dir)
 						break;
 					}
 				}
-			}
-			//If no values were found in this direction, check DIRN_DOWN	
+			}	
 			break;
 		case DIRN_STOP:
-			for(int i=0;i<4;i++)
+			for(int i=0;i<numberOfFloors;i++)
 			{
 				if(orderList.command[i] || orderList.up[i] || orderList.down[i])
 				{
@@ -172,9 +166,6 @@ int getNextFloor(int lastFloor, elev_motor_direction_t dir)
 					}
 				}
 			}	
-
-			
 	}
 	return nextFloor;
 }
-
